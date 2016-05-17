@@ -22,9 +22,11 @@ EnOcean Shield (TCM410J)で受信した無線データ(センサー情報)を、
 
 ## Requirement
 
-* お手軽IoT開発キットを用意してください
+* お手軽IoT開発キット(Arduino Uno R3 + DolphinV4(GWC) Shield + Ethernet Shield 2)を用意してください
 * Arduino IDE 1.7.2以降のバージョンを使用してください
 * [EnOcean Library for Arduino](https://github.com/simics-co/EnOcean)をインストールしてください
+* [Arduino Client for MQTT](https://github.com/knolleary/pubsubclient)をインストールしてください<br>
+  ※インストール手順は、「[EnOcean Library for Arduino](https://github.com/simics-co/EnOcean)」のREADME.md：Install 1～4を参考にしてください
 
 ## Usage
 
