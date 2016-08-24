@@ -66,7 +66,7 @@ EthernetClient client;
 PubSubClient mqttClient(MQTT_SERVER, 1883, NULL, client);
 
 static void connect(void);
-static void storeData(uint8_t rorg, uint32_t ID, uint32_t data);
+static void storeData(uint8_t rorg, uint32_t ID, uint32_t data, uint8_t rssi);
 static void getStoreData(void);
 
 ESP3Parser parser(storeData);
@@ -193,7 +193,7 @@ static void connect(void)
   Serial.println();
 }
 
-static void storeData(uint8_t rorg, uint32_t ID, uint32_t data)
+static void storeData(uint8_t rorg, uint32_t ID, uint32_t data, uint8_t rssi)
 {
   switch(ID) {
     case SEND_DEVICE_SW1:
