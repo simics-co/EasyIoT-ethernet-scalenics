@@ -12,6 +12,7 @@ Easy IoT Development Kit (Ethernet)
 * A5-02-05
 * A5-02-30
 * A5-07-01
+* A5-09-04
 
 ## Demo
 
@@ -56,7 +57,7 @@ EnOcean Shield (TCM410J)で受信した無線データ(センサー情報)を、
 
 ## Licence
 
-   Copyright 2016 LoonaiFactory
+   Copyright 2016-2018 LoonaiFactory
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
