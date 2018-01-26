@@ -96,8 +96,8 @@ String postData;
 char mqtt_topic[64];
 char mqtt_payload[32];
 
-char deviceID[4];
-char state[5];
+char deviceID[10];
+char state[10];
 char temp[10];
 
 void loop()
