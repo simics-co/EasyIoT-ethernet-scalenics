@@ -32,11 +32,13 @@
 #define SEND_DEVICE_TM1 0x04000001  // Temperature Sensor (EEP A5-02-30)
 #define SEND_DEVICE_TM2 0x04000002  // Temperature Sensor (EEP A5-02-05)
 #define SEND_DEVICE_OC1 0x04000003  // Occupancy Sensor (EEP A5-07-01)
+#define SEND_DEVICE_CO1 0x04000004  // CO2 Sensor (EEP A5-09-04)
 
 #define BUFF_SIZE 15
 typedef struct {
   uint32_t ID;
   uint32_t data;
+  uint8_t  rssi;
 } StoreDataType;
 StoreDataType storeDataSet[BUFF_SIZE];
 
@@ -91,14 +93,17 @@ void setup()
 
 #define TIME_DELAY 50  /* msec */
 uint32_t getID, getData;
+uint8_t getRssi;
 String topic;
-String postData;  
+String postData;
 char mqtt_topic[64];
 char mqtt_payload[32];
 
 char deviceID[10];
 char state[10];
+char hmd[10];
 char temp[10];
+char rssi[5];
 
 void loop()
 {
@@ -144,6 +149,17 @@ void loop()
         postData += state;
         postData.toCharArray(mqtt_payload, postData.length() + 1);
         break;
+      case SEND_DEVICE_CO1:
+        sprintf(state, "%d", profile.getCO2(EEP_A5_09_04, getData));
+        postData += state;
+        postData += "&v2=";
+        dtostrf((double)profile.getTemperature(EEP_A5_09_04, getData), 4, 1, temp);
+        postData += temp;
+        postData += "&v3=";
+        dtostrf((double)profile.getHumidity(EEP_A5_09_04, getData), 4, 1, hmd);
+        postData += hmd;
+        postData.toCharArray(mqtt_payload, postData.length() + 1);
+        break;
       default:
         Serial.print(F("getID = "));
         Serial.println(getID, HEX);
@@ -156,10 +172,12 @@ void loop()
     Serial.println(mqtt_payload);
     
     if (mqttClient.connect(deviceID, SC_USER, DEVICE_TOKEN)) {
-      Serial.println(F("  Connect to MQTT server.."));
+      Serial.println(F("  Connection to MQTT server succeeded"));
       mqttClient.publish(mqtt_topic, mqtt_payload);
-      Serial.println(F("  Disconnecting MQTT server.."));
-      mqttClient.disconnect();
+    } else {
+      int state = mqttClient.state();
+      Serial.print(F("  Connection to MQTT server failed: "));
+      Serial.println(state);
     }
   }
 }
@@ -201,6 +219,7 @@ static void storeData(uint8_t rorg, uint32_t ID, uint32_t data, uint8_t rssi)
     case SEND_DEVICE_TM1:
     case SEND_DEVICE_TM2:
     case SEND_DEVICE_OC1:
+    case SEND_DEVICE_CO1:
 
       if(((rorg == RORG_1BS) && !(data & EEP_1BS_LRN_BIT))
         || ((rorg == RORG_4BS) && !(data & EEP_4BS_LRN_BIT))) {
@@ -209,6 +228,7 @@ static void storeData(uint8_t rorg, uint32_t ID, uint32_t data, uint8_t rssi)
 
       storeDataSet[bfWritePoint].ID = ID;
       storeDataSet[bfWritePoint].data = data;
+      storeDataSet[bfWritePoint].rssi = rssi;
       bfWritePoint = ((++bfWritePoint) % BUFF_SIZE);
 
       if(bfWritePoint == bfReadPoint) {  /* Buffer overflow */
@@ -233,6 +253,7 @@ static void getStoreData(void)
 {
   getID = storeDataSet[bfReadPoint].ID;
   getData = storeDataSet[bfReadPoint].data;
+  getRssi = storeDataSet[bfReadPoint].rssi;
   bfReadPoint = ((++bfReadPoint) % BUFF_SIZE);
 
   if(bfWritePoint == bfReadPoint) {
